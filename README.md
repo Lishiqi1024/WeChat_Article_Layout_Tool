@@ -78,15 +78,16 @@ npm run dev
 
 ## 项目结构
 
+```
 wechat-formatter/
 ├── backend/              # Python后端
 │   ├── app.py           # Flask主程序
 │   ├── config.py        # 配置文件
 │   └── requirements.txt # Python依赖
 ├── frontend/            # Vue前端
-│   ├── src/
-│   ├── public/
-│   └── package.json
+│   ├── src/            # 源代码目录
+│   ├── public/         # 静态资源
+│   └── package.json    # 项目配置
 ├── log.md              # 日志文件
 └── README.md           # 项目说明
 ```
