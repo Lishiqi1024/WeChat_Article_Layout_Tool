@@ -96,6 +96,8 @@ wechat-formatter/
 
 ### 后端配置
 在 `backend/config.py` 中配置：
+1. 复制 config.template.py 为 config.py
+2. 在 config.py 中填入实际的 API 密钥和 URL
 - DeepSeek API Key
 - API URL
 - 样式配置
