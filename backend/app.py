@@ -95,7 +95,7 @@ def format_article():
         for i, chunk in enumerate(chunks):
             api_data = {
                 "model": API_MODEL,
-                "messages": 
+                "messages": [
                     {
                         "role": "system",
                         "content": """你是一个专业的微信公众号排版专家。请按照以下规则对文章进行排版：
@@ -114,6 +114,22 @@ def format_article():
    - 重要内容使用加粗标签
    - 引用使用blockquote标签
    - 列表使用ul/ol和li标签
+5. 图片：
+   - 图片使用img标签，宽度自适应
+   - 图片下方留适当的空白
+6. 超链接：
+   - 超链接使用a标签，颜色#1E9FFF
+7. 代码：
+   - 代码使用pre标签，字体大小14px，#888888
+   - 代码块使用code标签，字体大小14px，#888888
+8. 表格：
+   - 表格使用table标签
+   - 表头使用thead标签
+   - 表体使用tbody标签
+   - 单元格使用td标签
+9. 其他：
+   - 保持原文的意思，只对原文进行排版，不要添加任何新的内容
+  
 
 请将输入的文本转换为带有适当HTML标签和样式的格式。保持文章的整体结构清晰，视觉层次分明。
 
@@ -157,4 +173,4 @@ def format_article():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000) 
+    app.run(debug=True, port=5000)
