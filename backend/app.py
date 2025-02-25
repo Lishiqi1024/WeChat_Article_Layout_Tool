@@ -3,7 +3,7 @@ from flask_cors import CORS
 import requests
 import json
 import time
-from config import API_KEY, API_URL
+from config import API_KEY, API_URL,API_MODEL
 import logging
 
 app = Flask(__name__)
@@ -94,8 +94,8 @@ def format_article():
         
         for i, chunk in enumerate(chunks):
             api_data = {
-                "model": "deepseek-r1-250120",
-                "messages": [
+                "model": API_MODEL,
+                "messages": 
                     {
                         "role": "system",
                         "content": """你是一个专业的微信公众号排版专家。请按照以下规则对文章进行排版：

@@ -1,7 +1,0 @@
-{
-  "devDependencies": {
-    "@types/node": "^22.13.4",
-    "@vue/tsconfig": "^0.7.0",
-    "typescript": "^5.7.3"
-  }
-}
