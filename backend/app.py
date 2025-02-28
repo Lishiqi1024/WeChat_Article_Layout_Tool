@@ -5,6 +5,9 @@ import json
 import time
 from config import API_KEY, API_URL,API_MODEL
 import logging
+from utils.wechat import WeChatAPI
+from utils.document import DocumentProcessor
+from utils.ai_generator import AIGenerator
 
 app = Flask(__name__)
 
@@ -20,6 +23,9 @@ CORS(app, resources={
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# 初始化微信API
+wechat_api = WeChatAPI()
 
 def log_to_markdown(question, purpose):
     """记录操作日志到markdown文件"""
@@ -170,6 +176,87 @@ def format_article():
         
     except Exception as e:
         logger.error(f"处理请求错误: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/analyze', methods=['POST'])
+def analyze_document():
+    """分析文档并生成文章"""
+    try:
+        if 'file' in request.files:
+            # 处理文件上传
+            file = request.files['file']
+            text = DocumentProcessor.process_uploaded_file(file)
+        else:
+            # 处理URL
+            data = request.get_json()
+            if not data or 'url' not in data:
+                return jsonify({"error": "请提供PDF文件或URL"}), 400
+            text = DocumentProcessor.download_and_process_file(data['url'])
+
+        # 调用AI生成文章摘要
+        prompt = f"请根据以下内容生成一篇公众号文章：\n\n{text}"
+        summary = AIGenerator.generate_article(prompt)
+        return jsonify({"content": summary})
+
+    except Exception as e:
+        logger.error(f"文档分析错误: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/generate', methods=['POST'])
+def generate_article():
+    """根据用户输入生成文章"""
+    try:
+        data = request.get_json()
+        if not data or 'prompt' not in data:
+            return jsonify({"error": "请提供文章主题或关键词"}), 400
+
+        prompt = data['prompt']
+        content = AIGenerator.generate_article(prompt)
+        return jsonify({"content": content})
+
+    except Exception as e:
+        logger.error(f"文章生成错误: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/publish', methods=['POST'])
+def publish_to_wechat():
+    """发布到微信公众号草稿箱"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "请求数据为空"}), 400
+            
+        title = data.get('title')
+        content = data.get('content')
+
+        if not title:
+            return jsonify({"error": "文章标题不能为空"}), 400
+        if not content:
+            return jsonify({"error": "文章内容不能为空"}), 400
+
+        # 记录日志
+        log_to_markdown(
+            question="发布文章到微信公众号",
+            purpose=f"将文章《{title}》发布到微信公众号草稿箱"
+        )
+
+        try:
+            # 发布到草稿箱
+            media_id = wechat_api.add_draft(title, content)
+            return jsonify({
+                "success": True,
+                "media_id": media_id,
+                "message": "文章已成功保存到草稿箱"
+            })
+        except Exception as e:
+            logger.error(f"发布到微信失败: {str(e)}")
+            return jsonify({
+                "success": False,
+                "error": f"发布失败: {str(e)}"
+            }), 500
+
+    except Exception as e:
+        logger.error(f"处理发布请求失败: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
