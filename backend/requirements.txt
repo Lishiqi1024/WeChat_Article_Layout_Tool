@@ -3,4 +3,5 @@ flask-cors==4.0.0
 requests==2.26.0
 python-dotenv==1.0.0
 werkzeug==2.3.7
-PyMuPDF==1.22.5  # 用于处理PDF文件 
+PyMuPDF==1.22.5  # 用于处理PDF文件
+beautifulsoup4==4.9.3  # 用于解析网页内容 

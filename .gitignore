@@ -2,11 +2,25 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
-# 环境配置
-.env
-.venv
+*.so
+.Python
 env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
 venv/
 ENV/
 
@@ -16,10 +30,13 @@ ENV/
 *.swp
 *.swo
 
-# 项目特定文件
-backend/config.py
-log.md
+# Logs
 *.log
+log.md
+
+# Configuration
+backend/config.py
+.env
 
 # Node
 node_modules/
@@ -27,7 +44,13 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# 构建输出
-dist/
-build/
+# Build
+/dist
+/build
+
+# Local env files
+.env.local
+.env.*.local
+
+# Editor directories and files
 .DS_Store

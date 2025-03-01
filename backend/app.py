@@ -185,22 +185,54 @@ def analyze_document():
         if 'file' in request.files:
             # 处理文件上传
             file = request.files['file']
-            text = DocumentProcessor.process_uploaded_file(file)
+            result = DocumentProcessor.process_uploaded_file(file)
+            
+            # 记录日志
+            log_to_markdown(
+                question="PDF文件分析",
+                purpose=f"分析文件：{result['filename']}（{result['size']}）"
+            )
+            
+            # 调用AI生成文章摘要
+            prompt = f"请分析以下PDF文档内容并生成一篇公众号文章：\n\n{result['text']}"
+            summary = AIGenerator.generate_article(prompt)
+            
+            return jsonify({
+                "success": True,
+                "content": summary,
+                "message": f"已成功分析文件：{result['filename']}（{result['size']}）"
+            })
+            
         else:
             # 处理URL
             data = request.get_json()
             if not data or 'url' not in data:
                 return jsonify({"error": "请提供PDF文件或URL"}), 400
-            text = DocumentProcessor.download_and_process_file(data['url'])
-
-        # 调用AI生成文章摘要
-        prompt = f"请根据以下内容生成一篇公众号文章：\n\n{text}"
-        summary = AIGenerator.generate_article(prompt)
-        return jsonify({"content": summary})
+                
+            result = DocumentProcessor.download_and_process_file(data['url'])
+            
+            # 记录日志
+            log_to_markdown(
+                question="URL内容分析",
+                purpose=f"分析URL：{data['url']}"
+            )
+            
+            # 调用AI生成文章摘要
+            prompt = f"请分析以下内容并生成一篇公众号文章：\n\n{result['text']}"
+            summary = AIGenerator.generate_article(prompt)
+            
+            return jsonify({
+                "success": True,
+                "content": summary,
+                "message": f"已成功分析URL内容"
+            })
 
     except Exception as e:
         logger.error(f"文档分析错误: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 @app.route('/generate', methods=['POST'])
 def generate_article():
@@ -217,7 +249,6 @@ def generate_article():
     except Exception as e:
         logger.error(f"文章生成错误: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 @app.route('/publish', methods=['POST'])
 def publish_to_wechat():
     """发布到微信公众号草稿箱"""
@@ -228,6 +259,7 @@ def publish_to_wechat():
             
         title = data.get('title')
         content = data.get('content')
+        digest = data.get('digest')  # 获取用户提供的摘要
 
         if not title:
             return jsonify({"error": "文章标题不能为空"}), 400
@@ -241,8 +273,8 @@ def publish_to_wechat():
         )
 
         try:
-            # 发布到草稿箱
-            media_id = wechat_api.add_draft(title, content)
+            # 发布到草稿箱，传递摘要参数
+            media_id = wechat_api.add_draft(title, content, digest=digest)
             return jsonify({
                 "success": True,
                 "media_id": media_id,
